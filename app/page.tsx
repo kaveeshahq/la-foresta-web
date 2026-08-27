@@ -1,24 +1,27 @@
+import { SiteHeader } from "@/components/layout/site-header";
+import { HeroSection } from "@/components/sections/home/hero-section";
+import { ExperienceSection } from "@/components/sections/home/experience-section";
+import { UpcomingEventSection } from "@/components/sections/home/upcoming-event-section";
+import { ArtistLineupSection } from "@/components/sections/home/artist-lineup-section";
+import { MomentsSection } from "@/components/sections/home/moments-section";
+import { FinalCtaSection } from "@/components/sections/home/final-cta-section";
+import { SiteFooter } from "@/components/layout/site-footer";
+
 export default function Home() {
   return (
-    <main className="lf-noise lf-grid flex min-h-screen items-center">
-      <div className="lf-container">
+    <>
+      <SiteHeader />
 
-        <p className="font-technical mb-5 text-xs uppercase tracking-[0.3em] text-electric">
-          Colombo / Sri Lanka / Electronic Culture
-        </p>
+      <main>
+        <HeroSection />
+        <ExperienceSection />
+        <UpcomingEventSection/>
+        <ArtistLineupSection/>
+        <MomentsSection/>
+        <FinalCtaSection/>
+      </main>
 
-        <h1 className="font-display max-w-5xl text-[clamp(4rem,12vw,10rem)] font-semibold leading-[0.82] tracking-[-0.06em]">
-          LA
-          <br />
-          FORESTA
-        </h1>
-
-        <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
-          Immersive electronic music experiences where
-          sound, nature and human energy converge.
-        </p>
-
-      </div>
-    </main>
+      <SiteFooter/>
+    </>
   );
 }
