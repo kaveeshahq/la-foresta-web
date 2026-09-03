@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import Image from "next/image";
+import {
+  useEffect,
+  useRef,
+} from "react";
 
 import { gsap } from "@/lib/gsap";
 
@@ -13,11 +17,25 @@ export function EclipseVisual({
   videoSrc,
   imageSrc,
 }: EclipseVisualProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const coreRef = useRef<HTMLDivElement>(null);
-  const haloRef = useRef<HTMLDivElement>(null);
+  const rootRef =
+    useRef<HTMLDivElement>(null);
+
+  const coreRef =
+    useRef<HTMLDivElement>(null);
+
+  const haloRef =
+    useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+    if (reducedMotion) {
+      return;
+    }
+
     const ctx = gsap.context(() => {
       gsap.to(coreRef.current, {
         scale: 1.045,
@@ -43,7 +61,6 @@ export function EclipseVisual({
       ref={rootRef}
       className="relative flex size-full items-center justify-center"
     >
-      {/* Outer orbit */}
       <div
         ref={haloRef}
         className="absolute size-[92%] rounded-full border border-electric/10"
@@ -51,17 +68,14 @@ export function EclipseVisual({
         <span className="absolute left-1/2 top-0 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-electric shadow-[0_0_28px_var(--electric)]" />
       </div>
 
-      {/* Orbit rings */}
       <div className="absolute size-[76%] rounded-full border border-electric/15" />
 
       <div className="absolute size-[60%] rounded-full border border-electric/20" />
 
-      {/* Atmospheric glow */}
       <div className="absolute size-[78%] rounded-full bg-forest-light/10 blur-[90px]" />
 
       <div className="absolute size-[62%] rounded-full bg-electric/5 blur-[50px]" />
 
-      {/* Eclipse core */}
       <div
         ref={coreRef}
         className="relative size-[52%]"
@@ -71,7 +85,6 @@ export function EclipseVisual({
         <div className="absolute inset-[-2px] rounded-full border border-electric/30" />
 
         <div className="relative size-full overflow-hidden rounded-full bg-black">
-          {/* Video */}
           {videoSrc && (
             <video
               autoPlay
@@ -88,33 +101,33 @@ export function EclipseVisual({
             </video>
           )}
 
-          {/* Image fallback */}
-          {!videoSrc && imageSrc && (
-            <img
-              src={imageSrc}
-              alt=""
-              className="absolute inset-0 size-full object-cover"
-            />
-          )}
+          {!videoSrc &&
+            imageSrc && (
+              <Image
+                src={imageSrc}
+                alt=""
+                fill
+                sizes="400px"
+                priority
+                className="object-cover"
+              />
+            )}
 
-          {/* Keep core black if no media */}
-          {!videoSrc && !imageSrc && (
-            <div className="absolute inset-0 bg-black" />
-          )}
+          {!videoSrc &&
+            !imageSrc && (
+              <div className="absolute inset-0 bg-black" />
+            )}
 
-          {/* Dark cinematic treatment */}
           <div className="absolute inset-0 bg-black/25" />
 
           <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-transparent to-electric/10" />
 
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.08),transparent_30%)]" />
 
-          {/* Inner vignette */}
           <div className="absolute inset-0 rounded-full shadow-[inset_0_0_70px_rgba(0,0,0,0.9)]" />
         </div>
       </div>
 
-      {/* Forest silhouette */}
       <div className="absolute bottom-[12%] left-1/2 h-[28%] w-[130%] -translate-x-1/2 overflow-hidden opacity-75">
         <div className="absolute bottom-0 left-[3%] h-[55%] w-[12%] bg-black [clip-path:polygon(50%_0%,100%_100%,0%_100%)]" />
 

@@ -8,7 +8,8 @@ import {
 import { gsap } from "@/lib/gsap";
 
 export function ExperienceSection() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef =
+    useRef<HTMLElement>(null);
 
   const labelRef =
     useRef<HTMLParagraphElement>(null);
@@ -27,10 +28,29 @@ export function ExperienceSection() {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      /*
-       * Ambient glow slowly moves as
-       * the section enters.
-       */
+      const reducedMotion =
+        window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+      if (reducedMotion) {
+        gsap.set(
+          [
+            labelRef.current,
+            headingRef.current,
+            copyRef.current,
+            lineRef.current,
+            ambientRef.current,
+          ],
+          {
+            opacity: 1,
+            clearProps: "transform",
+          }
+        );
+
+        return;
+      }
+
       gsap.fromTo(
         ambientRef.current,
         {
@@ -40,21 +60,16 @@ export function ExperienceSection() {
         {
           scale: 1.15,
           opacity: 1,
-
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top bottom",
             end: "65% center",
             scrub: 1.2,
           },
-
           immediateRender: false,
         }
       );
 
-      /*
-       * Label
-       */
       gsap.fromTo(
         labelRef.current,
         {
@@ -66,21 +81,16 @@ export function ExperienceSection() {
           y: 0,
           duration: 0.8,
           ease: "power3.out",
-
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 76%",
             toggleActions:
               "play none none reverse",
           },
-
           immediateRender: false,
         }
       );
 
-      /*
-       * Heading
-       */
       gsap.fromTo(
         headingRef.current,
         {
@@ -92,21 +102,16 @@ export function ExperienceSection() {
           y: 0,
           duration: 1.2,
           ease: "power3.out",
-
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 69%",
             toggleActions:
               "play none none reverse",
           },
-
           immediateRender: false,
         }
       );
 
-      /*
-       * Copy
-       */
       gsap.fromTo(
         copyRef.current,
         {
@@ -118,37 +123,31 @@ export function ExperienceSection() {
           y: 0,
           duration: 0.9,
           ease: "power3.out",
-
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 58%",
             toggleActions:
               "play none none reverse",
           },
-
           immediateRender: false,
         }
       );
 
-      /*
-       * Horizontal line reveal
-       */
       gsap.fromTo(
         lineRef.current,
         {
           scaleX: 0,
-          transformOrigin: "left center",
+          transformOrigin:
+            "left center",
         },
         {
           scaleX: 1,
           duration: 1.2,
           ease: "power3.out",
-
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 55%",
           },
-
           immediateRender: false,
         }
       );
@@ -163,27 +162,14 @@ export function ExperienceSection() {
       ref={sectionRef}
       className="relative min-h-screen overflow-hidden bg-background py-[clamp(7rem,12vw,12rem)]"
     >
-      {/* Atmospheric continuation from hero */}
       <div
         ref={ambientRef}
-        className="
-          pointer-events-none
-          absolute
-          left-1/2
-          top-[-14rem]
-          size-[52rem]
-          -translate-x-1/2
-          rounded-full
-          bg-forest-light/10
-          blur-[160px]
-        "
+        className="pointer-events-none absolute left-1/2 top-[-14rem] size-[36rem] -translate-x-1/2 rounded-full bg-forest-light/10 blur-[160px] sm:size-[52rem]"
       />
 
-      {/* Subtle grid */}
       <div className="lf-grid pointer-events-none absolute inset-0 opacity-30" />
 
       <div className="lf-container relative z-10">
-        {/* Section number */}
         <div className="flex items-center justify-between">
           <p
             ref={labelRef}
@@ -193,22 +179,21 @@ export function ExperienceSection() {
           </p>
 
           <p className="font-technical hidden text-[9px] uppercase tracking-[0.2em] text-muted-foreground md:block">
-            Sound / Light / Space / Energy
+            Sound / Light / Space /
+            Energy
           </p>
         </div>
 
-        {/* Divider */}
         <div
           ref={lineRef}
           className="mt-7 h-px w-full bg-white/10"
         />
 
-        {/* Main composition */}
-        <div className="mt-14 grid gap-16 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
+        <div className="mt-12 grid gap-12 sm:mt-14 lg:grid-cols-[1.25fr_0.75fr] lg:items-end lg:gap-16">
           <div className="overflow-hidden">
             <h2
               ref={headingRef}
-              className="font-display text-[clamp(4.2rem,9.5vw,10.5rem)] font-medium leading-[0.8] tracking-[-0.07em]"
+              className="font-display text-[clamp(3.6rem,12vw,10.5rem)] font-medium leading-[0.8] tracking-[-0.07em]"
             >
               More than
               <br />
@@ -229,13 +214,14 @@ export function ExperienceSection() {
 
             <p className="mt-7 text-base leading-8 text-muted-foreground sm:text-lg">
               Every event is designed as a
-              journey — from the first arrival
-              to the final track.
+              journey — from the first
+              arrival to the final track.
             </p>
 
-            <div className="mt-12 border-l border-electric/30 pl-5">
+            <div className="mt-10 border-l border-electric/30 pl-5 sm:mt-12">
               <p className="font-technical text-[9px] uppercase leading-6 tracking-[0.22em] text-foreground">
-                We don&apos;t just host events.
+                We don&apos;t just host
+                events.
                 <br />
                 We build environments.
               </p>
@@ -243,24 +229,25 @@ export function ExperienceSection() {
           </div>
         </div>
 
-        {/* Bottom editorial markers */}
-        <div className="mt-24 grid grid-cols-2 gap-8 border-t border-white/10 pt-7 md:grid-cols-4">
+        <div className="mt-16 grid grid-cols-2 gap-8 border-t border-white/10 pt-7 sm:mt-24 md:grid-cols-4">
           {[
             ["01", "Sound"],
             ["02", "Light"],
             ["03", "Space"],
             ["04", "Energy"],
-          ].map(([number, label]) => (
-            <div key={number}>
-              <span className="font-technical text-[9px] text-electric">
-                {number}
-              </span>
+          ].map(
+            ([number, label]) => (
+              <div key={number}>
+                <span className="font-technical text-[9px] text-electric">
+                  {number}
+                </span>
 
-              <p className="font-display mt-2 text-xl tracking-[-0.03em] text-foreground/80">
-                {label}
-              </p>
-            </div>
-          ))}
+                <p className="font-display mt-2 text-xl tracking-[-0.03em] text-foreground/80">
+                  {label}
+                </p>
+              </div>
+            )
+          )}
         </div>
       </div>
     </section>

@@ -2,9 +2,11 @@ import Link from "next/link";
 
 export function SiteFooter() {
   return (
-    <footer className="relative border-t border-white/10 bg-background">
-      <div className="lf-container py-10">
-        <div className="grid gap-12 md:grid-cols-[1fr_auto_auto] md:items-start">
+    <footer className="relative overflow-hidden border-t border-white/10 bg-background">
+      <div className="pointer-events-none absolute bottom-[-18rem] left-[15%] size-[34rem] rounded-full bg-forest-light/5 blur-[150px]" />
+
+      <div className="lf-container relative z-10 py-10 sm:py-14">
+        <div className="grid gap-12 md:grid-cols-[1fr_auto_auto] md:items-start md:gap-16">
           <div>
             <Link
               href="/"
@@ -14,8 +16,10 @@ export function SiteFooter() {
             </Link>
 
             <p className="mt-4 max-w-sm text-sm leading-7 text-muted-foreground">
-              Electronic culture, immersive environments
-              and collective experiences from Sri Lanka.
+              Electronic culture,
+              immersive environments and
+              collective experiences from
+              Sri Lanka.
             </p>
           </div>
 
@@ -33,7 +37,7 @@ export function SiteFooter() {
               </Link>
 
               <Link
-                href="/experience"
+                href="/#experience"
                 className="transition-colors hover:text-electric"
               >
                 Experience
@@ -85,12 +89,12 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
+        <div className="mt-14 flex flex-col gap-5 border-t border-white/10 pt-6 sm:mt-16 md:flex-row md:items-center md:justify-between">
           <p className="font-technical text-[8px] uppercase tracking-[0.18em] text-muted-foreground">
             © 2026 La Foresta
           </p>
 
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-x-6 gap-y-3">
             <Link
               href="/privacy"
               className="font-technical text-[8px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
