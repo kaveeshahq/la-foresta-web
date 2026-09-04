@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  Activity,
   LogOut,
   ReceiptText,
+  ScanLine,
+  Search,
   ShieldCheck,
   TicketCheck,
   UserRound,
@@ -103,6 +106,34 @@ export function AccountClient() {
     );
   }
 
+  const canAccessScanner =
+    user.roles.some((role) =>
+      [
+        "SCANNER_STAFF",
+        "ADMIN",
+        "SUPER_ADMIN",
+      ].includes(role)
+    );
+
+  const canAccessAttendance =
+    user.roles.some((role) =>
+      [
+        "EVENT_MANAGER",
+        "ADMIN",
+        "SUPER_ADMIN",
+      ].includes(role)
+    );
+
+  const canAccessOrderOperations =
+    user.roles.some((role) =>
+      [
+        "FINANCE_MANAGER",
+        "SUPPORT_AGENT",
+        "ADMIN",
+        "SUPER_ADMIN",
+      ].includes(role)
+    );
+
   return (
     <div className="border border-white/10 bg-card/40 p-6 sm:p-8">
       <div className="flex items-start justify-between gap-6">
@@ -155,6 +186,42 @@ export function AccountClient() {
       </p>
 
       <div className="mt-7 grid gap-3 sm:grid-cols-2">
+        {canAccessScanner && (
+          <Link
+            href="/scanner"
+            className="group flex items-center justify-between border border-electric/25 p-4 transition-colors hover:border-electric/60"
+          >
+            <span className="font-technical text-[9px] uppercase tracking-[0.2em] text-electric">
+              Staff scanner
+            </span>
+            <ScanLine className="size-4 text-electric" />
+          </Link>
+        )}
+
+        {canAccessAttendance && (
+          <Link
+            href="/operations/attendance"
+            className="group flex items-center justify-between border border-electric/25 p-4 transition-colors hover:border-electric/60"
+          >
+            <span className="font-technical text-[9px] uppercase tracking-[0.2em] text-electric">
+              Attendance
+            </span>
+            <Activity className="size-4 text-electric" />
+          </Link>
+        )}
+
+        {canAccessOrderOperations && (
+          <Link
+            href="/operations/orders"
+            className="group flex items-center justify-between border border-electric/25 p-4 transition-colors hover:border-electric/60"
+          >
+            <span className="font-technical text-[9px] uppercase tracking-[0.2em] text-electric">
+              Order operations
+            </span>
+            <Search className="size-4 text-electric" />
+          </Link>
+        )}
+
         <Link
           href="/account/orders"
           className="group flex items-center justify-between border border-white/10 p-4 transition-colors hover:border-electric/40"

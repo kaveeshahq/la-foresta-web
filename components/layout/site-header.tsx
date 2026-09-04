@@ -140,8 +140,60 @@ export function SiteHeader() {
     }
   };
 
+  const canAccessScanner =
+    currentUser?.roles.some((role) =>
+      [
+        "SCANNER_STAFF",
+        "ADMIN",
+        "SUPER_ADMIN",
+      ].includes(role)
+    ) ?? false;
+
+  const canAccessAttendance =
+    currentUser?.roles.some((role) =>
+      [
+        "EVENT_MANAGER",
+        "ADMIN",
+        "SUPER_ADMIN",
+      ].includes(role)
+    ) ?? false;
+
+  const canAccessOrderOperations =
+    currentUser?.roles.some((role) =>
+      [
+        "FINANCE_MANAGER",
+        "SUPPORT_AGENT",
+        "ADMIN",
+        "SUPER_ADMIN",
+      ].includes(role)
+    ) ?? false;
+
   const accountNavigation = currentUser
     ? [
+        ...(canAccessScanner
+          ? [
+              {
+                label: "Scanner",
+                href: "/scanner",
+              },
+            ]
+          : []),
+        ...(canAccessAttendance
+          ? [
+              {
+                label: "Attendance",
+                href: "/operations/attendance",
+              },
+            ]
+          : []),
+        ...(canAccessOrderOperations
+          ? [
+              {
+                label: "Order Ops",
+                href: "/operations/orders",
+              },
+            ]
+          : []),
         {
           label: "Orders",
           href: "/account/orders",
@@ -191,7 +243,7 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden items-center gap-5 lg:flex">
-            {[...navigation, ...accountNavigation].map(
+            {navigation.map(
               (item) => (
                 <Link
                   key={
@@ -209,15 +261,50 @@ export function SiteHeader() {
               )
             )}
 
-            {currentUser && (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex items-center gap-2 font-technical text-[9px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
+            {currentUser ? (
+              <div className="group relative py-4">
+                <Link
+                  href="/account"
+                  className="font-technical text-[10px] uppercase tracking-[0.16em] text-electric"
+                >
+                  Account
+                </Link>
+
+                <div className="pointer-events-none absolute right-0 top-full w-56 translate-y-2 border border-white/10 bg-background/95 p-2 opacity-0 shadow-2xl backdrop-blur-xl transition-all group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+                  {accountNavigation.map(
+                    (item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className="block border-b border-white/10 px-3 py-3 font-technical text-[8px] uppercase tracking-[0.16em] text-muted-foreground transition-colors last:border-0 hover:text-electric"
+                      >
+                        {item.label}
+                      </Link>
+                    )
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex w-full items-center justify-between px-3 py-3 font-technical text-[8px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Sign out
+                    <LogOut className="size-3.5" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href={
+                  currentUser === undefined
+                    ? "/account"
+                    : "/login"
+                }
+                className="font-technical text-[10px] uppercase tracking-[0.16em] text-muted-foreground transition-colors hover:text-foreground"
               >
-                <LogOut className="size-3.5" />
-                Sign out
-              </button>
+                {currentUser === undefined
+                  ? "Account"
+                  : "Sign in"}
+              </Link>
             )}
 
             <Link
