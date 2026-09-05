@@ -158,6 +158,15 @@ export function SiteHeader() {
       ].includes(role)
     ) ?? false;
 
+  const canAccessEventManagement =
+    currentUser?.roles.some((role) =>
+      [
+        "EVENT_MANAGER",
+        "ADMIN",
+        "SUPER_ADMIN",
+      ].includes(role)
+    ) ?? false;
+
   const canAccessOrderOperations =
     currentUser?.roles.some((role) =>
       [
@@ -183,6 +192,14 @@ export function SiteHeader() {
               {
                 label: "Attendance",
                 href: "/operations/attendance",
+              },
+            ]
+          : []),
+        ...(canAccessEventManagement
+          ? [
+              {
+                label: "Event Studio",
+                href: "/operations/events",
               },
             ]
           : []),

@@ -65,33 +65,27 @@ export function SiteFooter() {
             </p>
 
             <div className="mt-4 flex flex-col gap-3 text-sm">
-              <a
-                href="#"
-                className="transition-colors hover:text-electric"
-              >
-                Instagram
-              </a>
-
-              <a
-                href="#"
-                className="transition-colors hover:text-electric"
-              >
-                Facebook
-              </a>
-
-              <a
-                href="#"
-                className="transition-colors hover:text-electric"
-              >
-                TikTok
-              </a>
+              {["Instagram", "Facebook", "TikTok"].map(
+                (platform) => (
+                  <span
+                    key={platform}
+                    className="flex items-center justify-between gap-5 text-muted-foreground"
+                    aria-label={`${platform}, coming soon`}
+                  >
+                    {platform}
+                    <span className="font-technical text-[7px] uppercase tracking-[0.16em] text-electric/65">
+                      Soon
+                    </span>
+                  </span>
+                )
+              )}
             </div>
           </div>
         </div>
 
         <div className="mt-14 flex flex-col gap-5 border-t border-white/10 pt-6 sm:mt-16 md:flex-row md:items-center md:justify-between">
           <p className="font-technical text-[8px] uppercase tracking-[0.18em] text-muted-foreground">
-            © 2026 La Foresta
+            &copy; 2026 La Foresta
           </p>
 
           <div className="flex flex-wrap gap-x-6 gap-y-3">
