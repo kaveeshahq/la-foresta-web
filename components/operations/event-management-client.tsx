@@ -8,6 +8,7 @@ import {
   Check,
   LoaderCircle,
   MapPin,
+  Pencil,
   Plus,
   Send,
   ShieldAlert,
@@ -32,6 +33,7 @@ import {
   getAdminVenues,
   publishEvent,
   updateEvent,
+  updateTicketType,
 } from "@/lib/api/event-management";
 import { formatMoney } from "@/lib/formatters";
 import type { CurrentUser } from "@/types/auth";
@@ -325,6 +327,7 @@ export function EventManagementClient() {
 
       {workingEvent && (
         <TicketTypePanel
+          key={workingEvent.id}
           event={workingEvent}
           ticketTypes={ticketTypes}
           loading={busy === "tickets"}
@@ -333,6 +336,14 @@ export function EventManagementClient() {
           onCreated={(ticketType) => {
             setTicketTypes((current) => [...current, ticketType]);
             setNotice(`${ticketType.name} inventory created.`);
+          }}
+          onUpdated={(ticketType) => {
+            setTicketTypes((current) =>
+              current.map((item) =>
+                item.id === ticketType.id ? ticketType : item
+              )
+            );
+            setNotice(`${ticketType.name} updated.`);
           }}
         />
       )}
@@ -618,6 +629,7 @@ function TicketTypePanel({
   onBusy,
   onError,
   onCreated,
+  onUpdated,
 }: {
   event: Event;
   ticketTypes: TicketType[];
@@ -625,15 +637,49 @@ function TicketTypePanel({
   onBusy: (value: string | null) => void;
   onError: (error: unknown, fallback: string) => void;
   onCreated: (ticketType: TicketType) => void;
+  onUpdated: (ticketType: TicketType) => void;
 }) {
-  const [form, setForm] = useState({ name: "", description: "", price: "", currency: "LKR", capacity: "", maxPerOrder: "4", salesStartAt: "", salesEndAt: "" });
+  const emptyForm = {
+    name: "",
+    description: "",
+    price: "",
+    currency: "LKR",
+    capacity: "",
+    maxPerOrder: "4",
+    salesStartAt: "",
+    salesEndAt: "",
+    active: true,
+  };
+  const [form, setForm] = useState(emptyForm);
+  const [editingTicketTypeId, setEditingTicketTypeId] =
+    useState<string | null>(null);
+
+  const resetForm = () => {
+    setEditingTicketTypeId(null);
+    setForm(emptyForm);
+  };
+
+  const beginEdit = (ticketType: TicketType) => {
+    setEditingTicketTypeId(ticketType.id);
+    setForm({
+      name: ticketType.name,
+      description: ticketType.description ?? "",
+      price: String(ticketType.price),
+      currency: ticketType.currency,
+      capacity: String(ticketType.capacity),
+      maxPerOrder: String(ticketType.maxPerOrder),
+      salesStartAt: toDateTimeInput(ticketType.salesStartAt),
+      salesEndAt: toDateTimeInput(ticketType.salesEndAt),
+      active: ticketType.active,
+    });
+  };
 
   const submit = async (submitEvent: FormEvent<HTMLFormElement>) => {
     submitEvent.preventDefault();
     onBusy("tickets");
 
     try {
-      const ticketType = await createTicketType(event.id, {
+      const payload = {
         name: form.name.trim(),
         description: form.description.trim() || null,
         price: Number(form.price),
@@ -642,9 +688,26 @@ function TicketTypePanel({
         maxPerOrder: Number(form.maxPerOrder),
         salesStartAt: form.salesStartAt ? new Date(form.salesStartAt).toISOString() : null,
         salesEndAt: form.salesEndAt ? new Date(form.salesEndAt).toISOString() : null,
-      });
-      onCreated(ticketType);
-      setForm((current) => ({ ...current, name: "", description: "", price: "", capacity: "" }));
+      };
+
+      if (editingTicketTypeId) {
+        onUpdated(
+          await updateTicketType(
+            event.id,
+            editingTicketTypeId,
+            {
+              ...payload,
+              active: form.active,
+            }
+          )
+        );
+      } else {
+        onCreated(
+          await createTicketType(event.id, payload)
+        );
+      }
+
+      resetForm();
     } catch (caught) {
       onError(caught, "Unable to create the ticket type.");
     } finally {
@@ -654,16 +717,31 @@ function TicketTypePanel({
 
   return (
     <form onSubmit={submit} className="border border-white/10 bg-card/40 p-5 sm:p-6">
-      <PanelHeading icon={<Ticket className="size-4" />} number="03" title="Ticket inventory" description={`Add admission types for ${event.title}.`} />
+      <PanelHeading icon={<Ticket className="size-4" />} number="03" title="Ticket inventory" description={editingTicketTypeId ? "Editing an existing admission type." : `Add admission types for ${event.title}.`} />
       {ticketTypes.length > 0 && (
         <div className="mt-6 border-y border-white/10">
           {ticketTypes.map((ticketType) => (
             <div key={ticketType.id} className="flex items-center justify-between gap-4 border-b border-white/10 py-4 last:border-0">
               <div>
-                <p className="text-sm">{ticketType.name}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm">{ticketType.name}</p>
+                  <span className={`border px-2 py-1 font-technical text-[7px] uppercase tracking-[0.13em] ${ticketType.active ? "border-electric/25 text-electric" : "border-white/15 text-muted-foreground"}`}>
+                    {ticketType.active ? "Active" : "Inactive"}
+                  </span>
+                </div>
                 <p className="font-technical mt-1 text-[7px] uppercase tracking-[0.14em] text-muted-foreground">Capacity {ticketType.capacity} / Max {ticketType.maxPerOrder}</p>
               </div>
-              <p className="font-display text-xl">{formatMoney(ticketType.price, ticketType.currency)}</p>
+              <div className="flex items-center gap-3">
+                <p className="font-display text-xl">{formatMoney(ticketType.price, ticketType.currency)}</p>
+                <button
+                  type="button"
+                  onClick={() => beginEdit(ticketType)}
+                  className="flex size-10 items-center justify-center border border-white/10 transition-colors hover:border-electric hover:text-electric"
+                  aria-label={`Edit ${ticketType.name}`}
+                >
+                  <Pencil className="size-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -681,7 +759,38 @@ function TicketTypePanel({
       <div className="mt-4">
         <TextArea label="Ticket description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={500} rows={3} />
       </div>
-      <SubmitButton busy={loading} label="Add ticket type" />
+      {editingTicketTypeId && (
+        <label className="mt-5 flex cursor-pointer items-center justify-between gap-4 border border-white/10 p-4">
+          <span>
+            <span className="block text-sm">Available for new reservations</span>
+            <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+              Turning this off hides the ticket type and blocks new reservations.
+            </span>
+          </span>
+          <input
+            type="checkbox"
+            checked={form.active}
+            onChange={(changeEvent) =>
+              setForm({
+                ...form,
+                active: changeEvent.target.checked,
+              })
+            }
+            className="size-5 accent-[var(--electric)]"
+          />
+        </label>
+      )}
+      <SubmitButton busy={loading} label={editingTicketTypeId ? "Save ticket changes" : "Add ticket type"} />
+      {editingTicketTypeId && (
+        <button
+          type="button"
+          onClick={resetForm}
+          disabled={loading}
+          className="mt-3 min-h-11 w-full border border-white/10 font-technical text-[8px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+        >
+          Cancel editing
+        </button>
+      )}
     </form>
   );
 }

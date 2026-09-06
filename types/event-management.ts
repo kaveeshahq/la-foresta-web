@@ -48,6 +48,11 @@ export type CreateTicketTypePayload = {
   salesEndAt: string | null;
 };
 
+export type UpdateTicketTypePayload =
+  CreateTicketTypePayload & {
+    active: boolean;
+  };
+
 export type ManagedEvent = Event & {
   ticketTypes?: TicketType[];
 };
