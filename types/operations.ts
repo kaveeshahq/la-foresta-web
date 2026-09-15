@@ -6,9 +6,10 @@ import type { TicketStatus } from "@/types/ticket";
 
 export type AdminOrderSummary = {
   orderId: string;
-  userId: string;
+  userId: string | null;
   customerEmail: string;
   customerName: string;
+  guest: boolean;
   status: OrderStatus;
   subtotalAmount: number;
   discountAmount: number;
@@ -57,8 +58,10 @@ export type AdminTicket = {
 
 export type AdminOrder = {
   orderId: string;
-  userId: string;
+  userId: string | null;
   customerEmail: string;
+  customerName: string;
+  guest: boolean;
   reservationId: string;
   status: OrderStatus;
   subtotalAmount: number;

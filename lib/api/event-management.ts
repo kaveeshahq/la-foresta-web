@@ -4,6 +4,7 @@ import type {
   CreateVenuePayload,
   SaveEventPayload,
   UpdateTicketTypePayload,
+  UpdateVenuePayload,
   Venue,
 } from "@/types/event-management";
 import type { TicketType } from "@/types/ticket-type";
@@ -84,6 +85,20 @@ export function getAdminVenues() {
     "/api/staff/venues",
     { method: "GET", cache: "no-store" },
     "Unable to load venues."
+  );
+}
+
+export function updateVenue(
+  venueId: string,
+  payload: UpdateVenuePayload
+) {
+  return request<Venue>(
+    `/api/staff/venues/${encodeURIComponent(venueId)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+    "Unable to update the venue."
   );
 }
 

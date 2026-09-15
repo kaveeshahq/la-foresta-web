@@ -24,6 +24,8 @@ export type CreateVenuePayload = {
   longitude: number | null;
 };
 
+export type UpdateVenuePayload = CreateVenuePayload;
+
 export type SaveEventPayload = {
   venueId: string;
   title: string;

@@ -1,7 +1,13 @@
 import { OrderOperationsClient } from "@/components/operations/order-operations-client";
 import { AuthShell } from "@/components/auth/auth-shell";
 
-export default function OrderOperationsPage() {
+export default async function OrderOperationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string }>;
+}) {
+  const { email } = await searchParams;
+
   return (
     <AuthShell
       eyebrow="Operations / Orders"
@@ -12,9 +18,9 @@ export default function OrderOperationsPage() {
           resolve
         </>
       }
-      description="Search registered customer purchases, inspect payments and tickets, and process authorized development refunds."
+      description="Search guest and registered purchases, inspect payments and tickets, and process authorized development refunds."
     >
-      <OrderOperationsClient />
+      <OrderOperationsClient initialEmail={email ?? ""} />
     </AuthShell>
   );
 }

@@ -79,12 +79,16 @@ function formatStatus(value: string) {
   return value.replaceAll("_", " ");
 }
 
-export function OrderOperationsClient() {
+export function OrderOperationsClient({
+  initialEmail = "",
+}: {
+  initialEmail?: string;
+}) {
   const router = useRouter();
   const [user, setUser] = useState<
     CurrentUser | null | undefined
   >(undefined);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [orders, setOrders] = useState<
     AdminOrderSummary[] | null
   >(null);
@@ -256,7 +260,7 @@ export function OrderOperationsClient() {
           htmlFor="customerEmail"
           className="font-technical text-[8px] uppercase tracking-[0.18em] text-muted-foreground"
         >
-          Registered customer email
+          Customer email
         </label>
         <input
           id="customerEmail"
@@ -288,9 +292,9 @@ export function OrderOperationsClient() {
           )}
         </button>
         <p className="mt-4 text-xs leading-6 text-muted-foreground">
-          The current Spring search contract returns
-          registered purchases only. Guest orders are
-          not searchable by this endpoint.
+          Searches both registered purchases and guest
+          checkout orders without exposing guest access
+          tokens.
         </p>
       </form>
 
@@ -327,9 +331,14 @@ export function OrderOperationsClient() {
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="font-display text-xl tracking-[-0.03em]">
-                      {order.customerName}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-display text-xl tracking-[-0.03em]">
+                        {order.customerName}
+                      </p>
+                      <span className="border border-white/15 px-2 py-1 font-technical text-[7px] uppercase tracking-[0.14em] text-muted-foreground">
+                        {order.guest ? "Guest" : "Registered"}
+                      </span>
+                    </div>
                     <p className="mt-2 break-all text-xs text-muted-foreground">
                       {order.customerEmail}
                     </p>
@@ -453,9 +462,15 @@ function AdminOrderDetail({
             <p className="font-technical text-[7px] uppercase tracking-[0.16em] text-muted-foreground">
               Customer
             </p>
+            <p className="mt-2 text-sm">
+              {order.customerName}
+            </p>
             <p className="mt-2 break-all text-sm">
               {order.customerEmail}
             </p>
+            <span className="font-technical mt-3 inline-block border border-white/15 px-2 py-1 text-[7px] uppercase tracking-[0.14em] text-muted-foreground">
+              {order.guest ? "Guest checkout" : "Registered account"}
+            </span>
           </div>
           <span
             className={`border px-3 py-2 font-technical text-[8px] uppercase tracking-[0.16em] ${statusStyles[order.status]}`}

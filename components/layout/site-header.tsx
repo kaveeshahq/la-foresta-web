@@ -177,8 +177,21 @@ export function SiteHeader() {
       ].includes(role)
     ) ?? false;
 
+  const canAccessSupport =
+    currentUser?.roles.some((role) =>
+      [
+        "SUPPORT_AGENT",
+        "ADMIN",
+        "SUPER_ADMIN",
+      ].includes(role)
+    ) ?? false;
+
   const accountNavigation = currentUser
     ? [
+        {
+          label: "Dashboard",
+          href: "/dashboard",
+        },
         ...(canAccessScanner
           ? [
               {
@@ -208,6 +221,14 @@ export function SiteHeader() {
               {
                 label: "Order Ops",
                 href: "/operations/orders",
+              },
+            ]
+          : []),
+        ...(canAccessSupport
+          ? [
+              {
+                label: "Support Desk",
+                href: "/operations/support",
               },
             ]
           : []),
@@ -281,10 +302,10 @@ export function SiteHeader() {
             {currentUser ? (
               <div className="group relative py-4">
                 <Link
-                  href="/account"
+                  href="/dashboard"
                   className="font-technical text-[10px] uppercase tracking-[0.16em] text-electric"
                 >
-                  Account
+                  Dashboard
                 </Link>
 
                 <div className="pointer-events-none absolute right-0 top-full w-56 translate-y-2 border border-white/10 bg-background/95 p-2 opacity-0 shadow-2xl backdrop-blur-xl transition-all group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">

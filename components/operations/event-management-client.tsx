@@ -34,6 +34,7 @@ import {
   publishEvent,
   updateEvent,
   updateTicketType,
+  updateVenue,
 } from "@/lib/api/event-management";
 import { formatMoney } from "@/lib/formatters";
 import type { CurrentUser } from "@/types/auth";
@@ -283,6 +284,7 @@ export function EventManagementClient() {
       />
 
       <VenueForm
+        venues={venues}
         busy={busy === "venue"}
         onCreated={(venue) => {
           setVenues((current) =>
@@ -295,6 +297,23 @@ export function EventManagementClient() {
             venueId: venue.id,
           }));
           setNotice(`${venue.name} created and selected for the event.`);
+        }}
+        onUpdated={(venue) => {
+          setVenues((current) =>
+            (current ?? [])
+              .map((item) =>
+                item.id === venue.id ? venue : item
+              )
+              .sort((a, b) => a.name.localeCompare(b.name))
+          );
+          setEvents((current) =>
+            (current ?? []).map((event) =>
+              event.venueId === venue.id
+                ? { ...event, venueName: venue.name }
+                : event
+            )
+          );
+          setNotice(`${venue.name} updated.`);
         }}
         onBusy={setBusy}
         onError={handleError}
@@ -461,17 +480,21 @@ function PublishedEvents({
 }
 
 function VenueForm({
+  venues,
   busy,
   onCreated,
+  onUpdated,
   onBusy,
   onError,
 }: {
+  venues: Venue[];
   busy: boolean;
   onCreated: (venue: Venue) => void;
+  onUpdated: (venue: Venue) => void;
   onBusy: (value: string | null) => void;
   onError: (error: unknown, fallback: string) => void;
 }) {
-  const [form, setForm] = useState({
+  const emptyForm = {
     name: "",
     addressLine1: "",
     addressLine2: "",
@@ -479,14 +502,37 @@ function VenueForm({
     country: "Sri Lanka",
     latitude: "",
     longitude: "",
-  });
+  };
+  const [form, setForm] = useState(emptyForm);
+  const [editingVenueId, setEditingVenueId] =
+    useState<string | null>(null);
+
+  const resetForm = () => {
+    setEditingVenueId(null);
+    setForm(emptyForm);
+  };
+
+  const beginEdit = (venue: Venue) => {
+    setEditingVenueId(venue.id);
+    setForm({
+      name: venue.name,
+      addressLine1: venue.addressLine1 ?? "",
+      addressLine2: venue.addressLine2 ?? "",
+      city: venue.city ?? "",
+      country: venue.country,
+      latitude:
+        venue.latitude === null ? "" : String(venue.latitude),
+      longitude:
+        venue.longitude === null ? "" : String(venue.longitude),
+    });
+  };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     onBusy("venue");
 
     try {
-      const venue = await createVenue({
+      const payload = {
         name: form.name.trim(),
         addressLine1: form.addressLine1.trim() || null,
         addressLine2: form.addressLine2.trim() || null,
@@ -494,9 +540,17 @@ function VenueForm({
         country: form.country.trim(),
         latitude: form.latitude ? Number(form.latitude) : null,
         longitude: form.longitude ? Number(form.longitude) : null,
-      });
-      onCreated(venue);
-      setForm((current) => ({ ...current, name: "", addressLine1: "", addressLine2: "", city: "", latitude: "", longitude: "" }));
+      };
+
+      if (editingVenueId) {
+        onUpdated(
+          await updateVenue(editingVenueId, payload)
+        );
+      } else {
+        onCreated(await createVenue(payload));
+      }
+
+      resetForm();
     } catch (caught) {
       onError(caught, "Unable to create the venue.");
     } finally {
@@ -506,7 +560,34 @@ function VenueForm({
 
   return (
     <form onSubmit={submit} className="border border-white/10 bg-card/40 p-5 sm:p-6">
-      <PanelHeading icon={<MapPin className="size-4" />} number="01" title="Create venue" description="Skip this step when the venue already appears in the event form." />
+      <PanelHeading icon={<MapPin className="size-4" />} number="01" title={editingVenueId ? "Edit venue" : "Venue directory"} description={editingVenueId ? "Update the selected venue without changing its event assignments." : "Create a venue or edit an existing location."} />
+      {venues.length > 0 && (
+        <div className="mt-6 border-y border-white/10">
+          {venues.map((venue) => (
+            <div
+              key={venue.id}
+              className="flex items-center justify-between gap-4 border-b border-white/10 py-4 last:border-0"
+            >
+              <div>
+                <p className="text-sm">{venue.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {[venue.city, venue.country]
+                    .filter(Boolean)
+                    .join(" / ")}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => beginEdit(venue)}
+                className="flex size-10 items-center justify-center border border-white/10 transition-colors hover:border-electric hover:text-electric"
+                aria-label={`Edit ${venue.name}`}
+              >
+                <Pencil className="size-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <Field label="Venue name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={150} />
         <Field label="Country" required value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} maxLength={100} />
@@ -518,7 +599,24 @@ function VenueForm({
           <Field label="Longitude" type="number" step="any" value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} />
         </div>
       </div>
-      <SubmitButton busy={busy} label="Create and select venue" />
+      <SubmitButton
+        busy={busy}
+        label={
+          editingVenueId
+            ? "Save venue changes"
+            : "Create and select venue"
+        }
+      />
+      {editingVenueId && (
+        <button
+          type="button"
+          onClick={resetForm}
+          disabled={busy}
+          className="mt-3 min-h-11 w-full border border-white/10 font-technical text-[8px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+        >
+          Cancel editing
+        </button>
+      )}
     </form>
   );
 }
