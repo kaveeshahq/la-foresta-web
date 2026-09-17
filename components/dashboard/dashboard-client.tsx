@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Activity,
   ArrowUpRight,
+  BadgePercent,
   CalendarRange,
   LifeBuoy,
   LoaderCircle,
@@ -44,6 +45,15 @@ const dashboardLinks: DashboardLink[] = [
       "Create venues, events and ticket inventory, then publish when ready.",
     href: "/operations/events",
     icon: CalendarRange,
+    roles: ["EVENT_MANAGER", "ADMIN", "SUPER_ADMIN"],
+    operational: true,
+  },
+  {
+    title: "Promotions",
+    description:
+      "Create event offers, control redemption windows and monitor usage.",
+    href: "/operations/promotions",
+    icon: BadgePercent,
     roles: ["EVENT_MANAGER", "ADMIN", "SUPER_ADMIN"],
     operational: true,
   },

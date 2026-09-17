@@ -214,6 +214,10 @@ export function SiteHeader() {
                 label: "Event Studio",
                 href: "/operations/events",
               },
+              {
+                label: "Promotions",
+                href: "/operations/promotions",
+              },
             ]
           : []),
         ...(canAccessOrderOperations
