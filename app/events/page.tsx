@@ -8,6 +8,7 @@ import {
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { getPublishedEvents } from "@/lib/api/events";
+import { getEventCardImage } from "@/lib/event-media";
 import {
   formatEventDate,
   formatEventTime,
@@ -101,61 +102,77 @@ export default async function EventsPage() {
             ) : (
               <div>
                 {result.events.map(
-                  (event, index) => (
-                    <article
-                      key={event.id}
-                      className="group grid gap-8 border-b border-white/10 py-10 sm:py-12 lg:grid-cols-[90px_1fr_auto] lg:items-center"
-                    >
-                      <p className="font-technical text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
-                        {String(
-                          index + 1
-                        ).padStart(2, "0")}
-                      </p>
+                  (event, index) => {
+                    const cardImage =
+                      getEventCardImage(event);
 
-                      <div>
-                        <p className="font-technical text-[9px] uppercase tracking-[0.2em] text-electric">
-                          {formatEventDate(
-                            event.startsAt
-                          )}
-                        </p>
-
-                        <h2 className="font-display mt-4 text-[clamp(2.8rem,6vw,6rem)] leading-[0.85] tracking-[-0.06em]">
-                          {event.title}
-                        </h2>
-
-                        {event.shortDescription && (
-                          <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                            {
-                              event.shortDescription
-                            }
+                    return (
+                      <article
+                        key={event.id}
+                        className="group grid gap-8 border-b border-white/10 py-10 sm:py-12 lg:grid-cols-[minmax(260px,0.75fr)_minmax(0,1fr)_auto] lg:items-center"
+                      >
+                        <Link
+                          href={`/events/${event.slug}`}
+                          aria-label={`View ${event.title}`}
+                          className="relative aspect-[4/3] overflow-hidden border border-white/10 bg-card"
+                        >
+                          <div
+                            role="img"
+                            aria-label={`${event.title} event artwork`}
+                            className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 ease-out group-hover:scale-[1.035]"
+                            style={{
+                              backgroundImage: `url("${cardImage}")`,
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/25" />
+                          <p className="font-technical absolute left-4 top-4 text-[8px] uppercase tracking-[0.2em] text-white/65">
+                            {String(index + 1).padStart(2, "0")}
                           </p>
-                        )}
+                        </Link>
 
-                        <div className="mt-6 flex flex-wrap gap-x-7 gap-y-3 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-2">
-                            <CalendarDays className="size-4 text-electric" />
-                            {formatEventTime(
+                        <div>
+                          <p className="font-technical text-[9px] uppercase tracking-[0.2em] text-electric">
+                            {formatEventDate(
                               event.startsAt
                             )}
-                          </span>
+                          </p>
 
-                          <span className="flex items-center gap-2">
-                            <MapPin className="size-4 text-electric" />
-                            {event.venueName ??
-                              "Location TBA"}
-                          </span>
+                          <h2 className="font-display mt-4 text-[clamp(2.8rem,6vw,5.5rem)] leading-[0.85] tracking-[-0.06em]">
+                            {event.title}
+                          </h2>
+
+                          {event.shortDescription && (
+                            <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+                              {event.shortDescription}
+                            </p>
+                          )}
+
+                          <div className="mt-6 flex flex-wrap gap-x-7 gap-y-3 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-2">
+                              <CalendarDays className="size-4 text-electric" />
+                              {formatEventTime(
+                                event.startsAt
+                              )}
+                            </span>
+
+                            <span className="flex items-center gap-2">
+                              <MapPin className="size-4 text-electric" />
+                              {event.venueName ??
+                                "Location TBA"}
+                            </span>
+                          </div>
                         </div>
-                      </div>
 
-                      <Link
-                        href={`/events/${event.slug}`}
-                        aria-label={`View ${event.title}`}
-                        className="flex size-14 items-center justify-center border border-white/15 transition-all group-hover:border-electric group-hover:bg-electric group-hover:text-background"
-                      >
-                        <ArrowUpRight className="size-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </Link>
-                    </article>
-                  )
+                        <Link
+                          href={`/events/${event.slug}`}
+                          aria-label={`View ${event.title}`}
+                          className="flex size-14 items-center justify-center border border-white/15 transition-all group-hover:border-electric group-hover:bg-electric group-hover:text-background"
+                        >
+                          <ArrowUpRight className="size-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                        </Link>
+                      </article>
+                    );
+                  }
                 )}
               </div>
             )}

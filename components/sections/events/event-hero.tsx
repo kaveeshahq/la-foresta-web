@@ -1,10 +1,10 @@
-import Image from "next/image";
 import {
   CalendarDays,
   Clock3,
   MapPin,
 } from "lucide-react";
 
+import { getEventHeroImage } from "@/lib/event-media";
 import {
   formatEventDate,
   formatEventTime,
@@ -19,19 +19,17 @@ type EventHeroProps = {
 export function EventHero({
   event,
 }: EventHeroProps) {
+  const heroImage = getEventHeroImage(event);
+
   return (
     <section className="lf-noise relative min-h-[100svh] overflow-hidden bg-background">
       {/* Artwork */}
-      <div className="absolute inset-0">
-        <Image
-          src="/media/events/eclipse-2026.jpg"
-          alt={event.title}
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-      </div>
+      <div
+        role="img"
+        aria-label={`${event.title} event artwork`}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url("${heroImage}")` }}
+      />
 
       {/* Treatment */}
       <div className="absolute inset-0 bg-black/45" />

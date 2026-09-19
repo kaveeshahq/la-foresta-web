@@ -16,6 +16,9 @@ export type Event = {
   shortDescription: string | null;
   description: string | null;
 
+  cardImageUrl: string | null;
+  heroImageUrl: string | null;
+
   status: EventStatus;
 
   startsAt: string;

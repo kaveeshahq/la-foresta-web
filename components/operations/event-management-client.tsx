@@ -6,6 +6,7 @@ import {
   ArrowUpRight,
   CalendarDays,
   Check,
+  ImageIcon,
   LoaderCircle,
   MapPin,
   Pencil,
@@ -36,6 +37,7 @@ import {
   updateTicketType,
   updateVenue,
 } from "@/lib/api/event-management";
+import { EVENT_MEDIA_FALLBACK } from "@/lib/event-media";
 import { formatMoney } from "@/lib/formatters";
 import type { CurrentUser } from "@/types/auth";
 import type { Event } from "@/types/events";
@@ -54,6 +56,8 @@ type EventForm = {
   slug: string;
   shortDescription: string;
   description: string;
+  cardImageUrl: string;
+  heroImageUrl: string;
   startsAt: string;
   endsAt: string;
   salesStartAt: string;
@@ -67,6 +71,8 @@ const emptyEventForm: EventForm = {
   slug: "",
   shortDescription: "",
   description: "",
+  cardImageUrl: "",
+  heroImageUrl: "",
   startsAt: "",
   endsAt: "",
   salesStartAt: "",
@@ -91,6 +97,8 @@ function eventToForm(event: Event): EventForm {
     slug: event.slug,
     shortDescription: event.shortDescription ?? "",
     description: event.description ?? "",
+    cardImageUrl: event.cardImageUrl ?? "",
+    heroImageUrl: event.heroImageUrl ?? "",
     startsAt: toDateTimeInput(event.startsAt),
     endsAt: toDateTimeInput(event.endsAt),
     salesStartAt: toDateTimeInput(event.salesStartAt),
@@ -653,6 +661,8 @@ function EventFormPanel({
       slug: form.slug.trim(),
       shortDescription: form.shortDescription.trim() || null,
       description: form.description.trim() || null,
+      cardImageUrl: form.cardImageUrl.trim() || null,
+      heroImageUrl: form.heroImageUrl.trim() || null,
       startsAt: new Date(form.startsAt).toISOString(),
       endsAt: dateOrNull(form.endsAt),
       salesStartAt: dateOrNull(form.salesStartAt),
@@ -715,8 +725,138 @@ function EventFormPanel({
         <TextArea label="Short description" value={form.shortDescription} onChange={(e) => onChange({ ...form, shortDescription: e.target.value })} maxLength={500} rows={3} />
         <TextArea label="Full description" value={form.description} onChange={(e) => onChange({ ...form, description: e.target.value })} rows={6} />
       </div>
+      <div className="mt-6 border-t border-white/10 pt-6">
+        <div className="flex items-start justify-between gap-5">
+          <div>
+            <p className="font-technical text-[8px] uppercase tracking-[0.18em] text-electric">
+              Event artwork
+            </p>
+            <p className="mt-2 max-w-xl text-xs leading-5 text-muted-foreground">
+              Use an http(s) URL or a frontend asset path beginning with /. The existing Eclipse artwork remains as the fallback.
+            </p>
+          </div>
+          <ImageIcon className="size-4 shrink-0 text-electric" />
+        </div>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Card image URL"
+            type="text"
+            maxLength={2048}
+            value={form.cardImageUrl}
+            onChange={(e) => onChange({ ...form, cardImageUrl: e.target.value })}
+            placeholder="/media/events/event-card.jpg"
+          />
+          <Field
+            label="Hero image URL"
+            type="text"
+            maxLength={2048}
+            value={form.heroImageUrl}
+            onChange={(e) => onChange({ ...form, heroImageUrl: e.target.value })}
+            placeholder="https://media.example.com/event-hero.jpg"
+          />
+        </div>
+
+        <EventMediaPreview
+          title={form.title || "Event artwork preview"}
+          cardImageUrl={form.cardImageUrl}
+          heroImageUrl={form.heroImageUrl}
+        />
+      </div>
       <SubmitButton busy={busy} label={event ? "Save event changes" : "Create draft event"} />
     </form>
+  );
+}
+
+function safePreviewUrl(...values: string[]) {
+  for (const value of values) {
+    const trimmed = value.trim();
+
+    if (!trimmed) continue;
+
+    try {
+      if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
+        const parsed = new URL(trimmed, "http://localhost");
+        return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+      }
+
+      const parsed = new URL(trimmed);
+
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+        return parsed.href;
+      }
+    } catch {
+      // The backend will return the final validation message on save.
+    }
+  }
+
+  return EVENT_MEDIA_FALLBACK;
+}
+
+function EventMediaPreview({
+  title,
+  cardImageUrl,
+  heroImageUrl,
+}: {
+  title: string;
+  cardImageUrl: string;
+  heroImageUrl: string;
+}) {
+  const cardImage = safePreviewUrl(
+    cardImageUrl,
+    heroImageUrl
+  );
+  const heroImage = safePreviewUrl(
+    heroImageUrl,
+    cardImageUrl
+  );
+
+  return (
+    <div className="mt-5 grid gap-4 lg:grid-cols-[0.75fr_1.25fr]">
+      <MediaPreview
+        label="Card"
+        title={title}
+        imageUrl={cardImage}
+        className="aspect-[4/3]"
+      />
+      <MediaPreview
+        label="Hero"
+        title={title}
+        imageUrl={heroImage}
+        className="aspect-[16/9]"
+      />
+    </div>
+  );
+}
+
+function MediaPreview({
+  label,
+  title,
+  imageUrl,
+  className,
+}: {
+  label: string;
+  title: string;
+  imageUrl: string;
+  className: string;
+}) {
+  return (
+    <div
+      role="img"
+      aria-label={`${label} artwork preview for ${title}`}
+      className={`relative overflow-hidden border border-white/10 bg-cover bg-center ${className}`}
+      style={{ backgroundImage: `url("${imageUrl}")` }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-black/20" />
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4">
+        <p className="font-display truncate text-xl tracking-[-0.04em] text-white">
+          {title}
+        </p>
+        <span className="font-technical shrink-0 text-[7px] uppercase tracking-[0.16em] text-white/60">
+          {label}
+        </span>
+      </div>
+    </div>
   );
 }
 

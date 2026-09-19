@@ -32,6 +32,8 @@ export type SaveEventPayload = {
   slug: string;
   shortDescription: string | null;
   description: string | null;
+  cardImageUrl: string | null;
+  heroImageUrl: string | null;
   startsAt: string;
   endsAt: string | null;
   salesStartAt: string | null;
